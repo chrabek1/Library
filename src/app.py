@@ -31,15 +31,19 @@ def list_books():
     with con:
         cur = con.cursor()
         cur.execute(sql)
-
+        row_headers=[x[0] for x in cur.description]
         rows = cur.fetchall()
-    return json.dumps(rows)
+        response=[]
+        for result in rows:
+            result=map(str,result)
+            response.append(dict(zip(row_headers,result)))
+    return json.dumps(response)
 
 @app.route('/book/<int:book_id>/return', methods=['POST'])
 def book_return(book_id):
     user_id=1
-    time = date.today().strftime("%Y-%m-%d")
-    return str(time)
+    #time = date.today().strftime("%Y-%m-%d")
+    #return str(time)
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM `books` WHERE `book_id` = " + str(book_id))
@@ -52,8 +56,8 @@ def book_return(book_id):
             if is_rented==0:
                 return "Nie wypożyczałeś tej książki typie"
             elif is_rented==1:
-                #time=date.today().strftime("%Y-%m-%d")
-                cur.execute("UPDATE `books_rentals` SET `end_date` = "+str(time)+" WHERE `user_id` = "+str(user_id)+" AND `book_id` = "+str(book_id)+" AND `end_date` IS NULL")
+                time=date.today().strftime("%Y-%m-%d")
+                cur.execute("UPDATE `books_rentals` SET `end_date` = '"+time+"' WHERE `user_id` = "+str(user_id)+" AND `book_id` = " + str(book_id) + " AND `end_date` IS NULL")
                 return "Ksiażka oddana"
             else:
                 return "coś nie tak"
@@ -90,13 +94,31 @@ def book_rent(book_id):
 
 @app.route('/book/<int:book_id>/')
 def view_book(book_id):
-    sql="SELECT * FROM `books_rentals` WHERE `book_id` = "+str(book_id)
+    #sql="SELECT * FROM `books_rentals` WHERE `book_id` = "+str(book_id)
+    response={}
     with con:
         cur=con.cursor()
-        cur.execute(sql)
 
-        rows=cur.fetchall()
-    return str(rows)
+        cur.execute("SELECT * FROM `books` WHERE `book_id` = "+str(book_id))
+        book_data_headers=[x[0] for x in cur.description]
+        book_data=cur.fetchone()
+        book_data=map(str,book_data)
+        response=dict(zip(book_data_headers,book_data))
+        response["rentals"]=[]
+        
+        cur.execute("SELECT * FROM `books_rentals` WHERE `book_id` = "+str(book_id))
+        row_headers=[x[0] for x in cur.description]
+        rows = cur.fetchall()
+        for result in rows:
+            result=map(str,result)
+            response["rentals"].append(dict(zip(row_headers,result)))
+
+        #return json.dumps(response)
+        #response.append(json.dumps(cur.fetchall()))
+        
+        #return str(book_data)
+        #response.append(json.dumps(cur.fetchall()))
+    return str(json.dumps(response, indent=4, sort_keys=True, default=str))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
