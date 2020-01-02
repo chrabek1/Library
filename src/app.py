@@ -5,7 +5,10 @@ from datetime import datetime, date
 
 app = Flask(__name__)
 
-con = pymysql.connect('192.168.1.87', 'root','pass','transit')
+try:
+    con = pymysql.connect('mysql', 'root','pass','transit')
+except Exception as e:
+    print("Dupa")
 
 print("Hello from docker")
 
