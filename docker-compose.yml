@@ -22,6 +22,7 @@ services:
       - MYSQL_ROOT_PASSWORD=pass
     volumes: 
       - ./data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 3s

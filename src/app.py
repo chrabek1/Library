@@ -16,7 +16,7 @@ class BookModel:
     cur = None
 
     def __init__(self):
-        self.con = pymysql.connect('mysql', 'root', 'pass', 'transit')
+        self.con = pymysql.connect('mysql', 'root', 'pass', 'library')
         self.cur = self.con.cursor()
         pass
 
