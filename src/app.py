@@ -1,11 +1,12 @@
 import json, pymysql
 import logging
-from flask import Flask, request
+from flask import Flask, request, session
 
 from book_model import BookModel
 from flask_login.login_manager import LoginManager
 
 app = Flask(__name__)
+app.secret_key = 'some secret key'
 book = BookModel()
 
 global_user_id = None
@@ -36,15 +37,13 @@ def before_request_func():
         app.logger.info('Not authorized') 
         return "", 401
     else:
-        global_user_id = user_id
-        request
-        app.logger.info(f"Authorized user: {user_id.pop()}")
-
-    
+        session['user_id'] = user_id.pop()
+        app.logger.info(f"Authorized user: {user_id}")
 
 
 @app.route('/')
 def hello_world():
+    app.logger.info(f"Zalogowany user id: {session['user_id']}")
     return 'kierowcaa ciężarówki'
 
 @app.route('/add_book', methods=['POST'])
@@ -55,6 +54,7 @@ def add_book():
 
 @app.route('/view_books')
 def list_books():
+    app.logger.info(f"Zalogowany user id: {session['user_id']}")
     global book
     books = book.all("name")
     return json.dumps(books)
