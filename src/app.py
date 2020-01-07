@@ -1,10 +1,47 @@
 import json, pymysql
+import logging
 from flask import Flask, request
 
 from book_model import BookModel
+from flask_login.login_manager import LoginManager
 
 app = Flask(__name__)
 book = BookModel()
+
+global_user_id = None
+
+keys = [
+    {
+        "key": "H10JZ74AT8CBUY57TP87",
+        "user_id": 1,
+    },
+    {
+        "key": "8U7YYZVM9NXUNE1OALJI",
+        "user_id": 2,
+    },
+    {
+        "key": "3NHF8RRY60ZJRG5TKKSH",
+        "user_id": 3,
+    }
+]
+
+@app.before_request
+def before_request_func():
+    api_key = request.headers.get('API_KEY')
+
+    user_id = list(map(lambda x: x["user_id"], filter(lambda x: x["key"] == api_key , keys)))
+    # app.logger.info(user_id)
+
+    if not user_id:
+        app.logger.info('Not authorized') 
+        return "", 401
+    else:
+        global_user_id = user_id
+        request
+        app.logger.info(f"Authorized user: {user_id.pop()}")
+
+    
+
 
 @app.route('/')
 def hello_world():

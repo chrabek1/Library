@@ -2,6 +2,7 @@ import json
 import pymysql
 from datetime import datetime, date
 
+
 class BookModel:
     
     con = None
