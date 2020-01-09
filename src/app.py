@@ -1,9 +1,8 @@
-import json, pymysql
-import logging
+import json, pymysql, xmltodict
+import logging, requests
 from flask import Flask, request, session
 
 from book_model import BookModel
-from flask_login.login_manager import LoginManager
 
 app = Flask(__name__)
 app.secret_key = 'some secret key'
@@ -46,6 +45,14 @@ def hello_world():
     app.logger.info(f"Zalogowany user id: {session['user_id']}")
     return 'kierowcaa ciężarówki'
 
+@app.route('/seek_book/<string:question>', methods=['POST'])
+def add_book_from_goodreads(question):
+    
+    url=f'https://www.goodreads.com/search/index.xml?key=93f0OTMA27A6aNRruDCGQ&q={question}'
+    response = requests.get(url)
+    data=xmltodict.parse(response.text)["GoodreadsResponse"]["search"]
+    return json.dumps(data)
+
 @app.route('/add_book', methods=['POST'])
 def add_book():
     global book
@@ -61,20 +68,20 @@ def list_books():
 
 @app.route('/book/<int:book_id>/return', methods=['POST'])
 def book_return(book_id):
-    user_id=1
+    user_id=session['user_id']
     global book
     return book.return_book(book_id, user_id)
       
 @app.route('/book/<int:book_id>/delete', methods=['DELETE'])
 def book_delete(book_id):
-    user_id=0
+    user_id=session['user_id']
     global book
     return book.delete(book_id,user_id)
 
 
 @app.route('/book/<int:book_id>/edit', methods=['PUT'])
 def book_edit(book_id):
-    user_id=0
+    user_id=session['user_id']
     global book
     data=request.json
     return book.edit(data,book_id,user_id)
@@ -82,7 +89,7 @@ def book_edit(book_id):
 
 @app.route('/book/<int:book_id>/rent', methods=['POST'])
 def book_rent(book_id):
-    user_id=1
+    user_id=session['user_id']
     global book
     return book.rent(book_id, user_id)
 
