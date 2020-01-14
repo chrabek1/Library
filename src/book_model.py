@@ -140,13 +140,15 @@ class BookModel:
             self.cur.execute(sql)
         return json.dumps(self.get_by_id(book_id))
 
-    def add(self, data, user_id):
+    def add(self, data):
 
-        if set(data.keys()) != set(['author','description','name']):
-            return "ale to nie do mnie tak, do mnie nie"
+        if set(data.keys()) != set(['author','description','name','user_id']):
+            return "ale to nie do mnie tak, do mnie nie 1"
 
-        if all(isinstance(item, str) for item in data.values()) == False:
-            return "ale to nie do mnie tak, do mnie nie"
+
+
+        #if all(isinstance(item, str) for item in data.values()) == False:
+        #    return "ale to nie do mnie tak, do mnie nie 2"
         sql="INSERT INTO `books` "
         a=['`'+field+'`' for field in data]
         b=['\''+str(field)+'\'' for field in data.values()]
