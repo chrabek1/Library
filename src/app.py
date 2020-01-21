@@ -13,7 +13,7 @@ global_user_id = None
 keys = [
     {
         "key": "H10JZ74AT8CBUY57TP87",
-        "user_id": 0,
+        "user_id": 1,
     },
     {
         "key": "8U7YYZVM9NXUNE1OALJI",
@@ -37,7 +37,7 @@ def before_request_func():
     app.logger.info(curr_url) 
     whitelist=["/","/google_sign_in"]
     if curr_url in whitelist:
-        session['user_id']=1
+        session['user_id']=0
         return 
     user_id = list(map(lambda x: x["user_id"], filter(lambda x: x["key"] == api_key , keys)))
     # app.logger.info(user_id)
@@ -71,6 +71,17 @@ def add_book_from_goodreads(question):
     url=f'https://www.goodreads.com/search/index.xml?key=93f0OTMA27A6aNRruDCGQ&q={question}'
     response = requests.get(url)
     data=xmltodict.parse(response.text)["GoodreadsResponse"]["search"]
+    len=int(data["results-end"])
+    data=data["results"]["work"]
+    result=[]
+    for i in range(len):
+        temp={}
+        temp["name"]= data[i]["best_book"]["title"]
+        temp["description"]= "no data"
+        temp["author"]= data[i]["best_book"]["author"]["name"]
+        app.logger.info(temp)
+        result.append(temp)
+    return json.dumps(result)
     return json.dumps(data)
 
 @app.route('/book', methods=['POST'])

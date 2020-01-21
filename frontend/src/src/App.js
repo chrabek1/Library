@@ -2,18 +2,24 @@ import React, { Component } from 'react';
 import axios from 'axios';
 //import Todo from './Todo'; 
 import Form from './Frorm';
+import SearchBooks from './SearchBook'
+import Book from './Book';
+import BookList from './BookList';
 
 class App extends Component {
   
-  myHeaders={"API_KEY": "H10JZ74AT8CBUY57TP87"}
+  myHeaders={"API_KEY": "H10JZ74AT8CBUY57TP87", 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': '*'}
   state = {
+    /*url: 'http://3.9.104.221:5001/',*/
     url: 'http://localhost:5001/',
     edit: false,
     editId: null,
     details: false,
     detailsId: null,
     books: [],
-    editedBook: {}
+    searchResult: [],
+    editedBook: {},
+    loginData: {}
   }
 
   onChange(updatedValue) {
@@ -108,6 +114,30 @@ class App extends Component {
       }
     });
   }
+  onSignIn(googleUser) {
+    this.setState({
+      loginData: googleUser.getBasicProfile()
+    })
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+    console.log('Name: ' + profile.getName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+  }
+  /*onLoadCallback() {
+    gapi.auth2.init({
+        client_id: 'filler_text_for_client_id.apps.googleusercontent.com'
+      });
+  }
+  signOut() {
+    if(gabi) {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+    }
+  }*/
+
   detailsRender(book_id) {
     if(this.state.details && book_id == this.state.detailsId) {
       let rentals = this.state.details.rentals.map((rental) => {
@@ -158,43 +188,21 @@ class App extends Component {
 
     }
   }
-  render() {
-    let books = this.state.books.map((book) => {
-      return (
-        <tr key={book.book_id}>
-          <td>{book.book_id}</td>
-          <td>{book.name}</td>
-          <td>{book.author}</td>
-          <td>{book.description}</td>
-          <td>{book.user_id}</td>
-          <td>
-            <button onClick={this.onEditHandle.bind(this,book.book_id)}>Edit</button>
-            <button onClick={this.onDeleteHandle.bind(this, book.book_id)}>Delete</button>
-            <button onClick={this.onDetailsHandle.bind(this, book.book_id)}>Details</button>
-          </td>
-          {this.detailsRender(book.book_id)}
-        </tr>
-      )
-    });
-    return (
+  GoogleLoginRender() {
+    return(
+      <div>
+      <div className="g-signin2" data-onsuccess="onSignIn"></div>
       
+      </div>
+    )
+  }
+  render() {
+    return (
       <div className="App-container">
-        {this.FormRender()}
-        {this.renderDeleteInfo}
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Description</th>
-              <th>Owner ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {books}
-          </tbody>
-        </table>
+        {/* {this.GoogleLoginRender()} */}
+        <BookList key={1} data={this.state.books}/>
+        <SearchBooks url={() => this.state.url} getData={() => this.getData()} myHeaders={() =>this.myHeaders } />
+        {/* {this.FormRender()} */}
       </div>
       );
   }
